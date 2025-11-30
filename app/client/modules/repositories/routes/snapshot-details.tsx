@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { redirect, useParams } from "react-router";
 import { listSnapshotFilesOptions } from "~/client/api-client/@tanstack/react-query.gen";
 import { Card, CardContent, CardHeader, CardTitle } from "~/client/components/ui/card";
-import { RestoreSnapshotDialog } from "../components/restore-snapshot-dialog";
 import { SnapshotFileBrowser } from "~/client/modules/backups/components/snapshot-file-browser";
 import { getSnapshotDetails } from "~/client/api-client";
 import type { Route } from "./+types/snapshot-details";
@@ -63,7 +62,6 @@ export default function SnapshotDetailsPage({ loaderData }: Route.ComponentProps
 					<h1 className="text-2xl font-bold">{name}</h1>
 					<p className="text-sm text-muted-foreground">Snapshot: {snapshotId}</p>
 				</div>
-				<RestoreSnapshotDialog name={name} snapshotId={snapshotId} />
 			</div>
 
 			<SnapshotFileBrowser repositoryName={name} snapshot={loaderData} />
