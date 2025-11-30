@@ -1966,6 +1966,10 @@ export type GetScheduleNotificationsResponses = {
                 userKey: string;
                 devices?: string;
             } | {
+                botToken: string;
+                chatId: string;
+                type: 'telegram';
+            } | {
                 from: string;
                 password: string;
                 smtpHost: string;
@@ -2007,7 +2011,7 @@ export type GetScheduleNotificationsResponses = {
             enabled: boolean;
             id: number;
             name: string;
-            type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack';
+            type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack' | 'telegram';
             updatedAt: number;
         };
         destinationId: number;
@@ -2050,6 +2054,10 @@ export type UpdateScheduleNotificationsResponses = {
                 userKey: string;
                 devices?: string;
             } | {
+                botToken: string;
+                chatId: string;
+                type: 'telegram';
+            } | {
                 from: string;
                 password: string;
                 smtpHost: string;
@@ -2091,7 +2099,7 @@ export type UpdateScheduleNotificationsResponses = {
             enabled: boolean;
             id: number;
             name: string;
-            type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack';
+            type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack' | 'telegram';
             updatedAt: number;
         };
         destinationId: number;
@@ -2122,6 +2130,10 @@ export type ListNotificationDestinationsResponses = {
             type: 'pushover';
             userKey: string;
             devices?: string;
+        } | {
+            botToken: string;
+            chatId: string;
+            type: 'telegram';
         } | {
             from: string;
             password: string;
@@ -2164,7 +2176,7 @@ export type ListNotificationDestinationsResponses = {
         enabled: boolean;
         id: number;
         name: string;
-        type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack';
+        type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack' | 'telegram';
         updatedAt: number;
     }>;
 };
@@ -2179,6 +2191,10 @@ export type CreateNotificationDestinationData = {
             type: 'pushover';
             userKey: string;
             devices?: string;
+        } | {
+            botToken: string;
+            chatId: string;
+            type: 'telegram';
         } | {
             from: string;
             password: string;
@@ -2236,6 +2252,10 @@ export type CreateNotificationDestinationResponses = {
             userKey: string;
             devices?: string;
         } | {
+            botToken: string;
+            chatId: string;
+            type: 'telegram';
+        } | {
             from: string;
             password: string;
             smtpHost: string;
@@ -2277,7 +2297,7 @@ export type CreateNotificationDestinationResponses = {
         enabled: boolean;
         id: number;
         name: string;
-        type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack';
+        type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack' | 'telegram';
         updatedAt: number;
     };
 };
@@ -2339,6 +2359,10 @@ export type GetNotificationDestinationResponses = {
             userKey: string;
             devices?: string;
         } | {
+            botToken: string;
+            chatId: string;
+            type: 'telegram';
+        } | {
             from: string;
             password: string;
             smtpHost: string;
@@ -2380,7 +2404,7 @@ export type GetNotificationDestinationResponses = {
         enabled: boolean;
         id: number;
         name: string;
-        type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack';
+        type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack' | 'telegram';
         updatedAt: number;
     };
 };
@@ -2395,6 +2419,10 @@ export type UpdateNotificationDestinationData = {
             type: 'pushover';
             userKey: string;
             devices?: string;
+        } | {
+            botToken: string;
+            chatId: string;
+            type: 'telegram';
         } | {
             from: string;
             password: string;
@@ -2462,6 +2490,10 @@ export type UpdateNotificationDestinationResponses = {
             userKey: string;
             devices?: string;
         } | {
+            botToken: string;
+            chatId: string;
+            type: 'telegram';
+        } | {
             from: string;
             password: string;
             smtpHost: string;
@@ -2503,7 +2535,7 @@ export type UpdateNotificationDestinationResponses = {
         enabled: boolean;
         id: number;
         name: string;
-        type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack';
+        type: 'custom' | 'discord' | 'email' | 'gotify' | 'ntfy' | 'pushover' | 'slack' | 'telegram';
         updatedAt: number;
     };
 };
