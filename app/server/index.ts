@@ -46,9 +46,12 @@ const app = new Hono()
 	.use(secureHeaders())
 	.use(
 		rateLimiter({
-			windowMs: 15 * 60 * 1000,
-			limit: 100,
+			windowMs: 60 * 5 * 1000,
+			limit: 1000,
 			keyGenerator: (c) => c.req.header("x-forwarded-for") ?? "",
+			skip: () => {
+				return config.__prod__ === false;
+			},
 		}),
 	)
 	.get("healthcheck", (c) => c.json({ status: "ok" }))
