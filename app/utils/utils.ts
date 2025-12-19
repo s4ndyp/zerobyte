@@ -1,6 +1,6 @@
 import { intervalToDuration } from "date-fns";
 
-export const getCronExpression = (frequency: string, dailyTime?: string, weeklyDay?: string,monthlyDays?: string[]): string => {
+export const getCronExpression = (frequency: string, dailyTime?: string, weeklyDay?: string, monthlyDays?: string[]): string => {
 	if (frequency === "hourly") {
 		return "0 * * * *";
 	}
