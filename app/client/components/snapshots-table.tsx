@@ -141,7 +141,7 @@ export const SnapshotsTable = ({ snapshots, repositoryName, backups }: Props) =>
 											<Server className="h-4 w-4 text-muted-foreground" />
 											{backup ? (
 												<Link
-													to={`/volumes/${backup.volume.id}`}
+													to={`/volumes/${backup.volume.name}`}
 													onClick={(e) => e.stopPropagation()}
 													className="text-sm hover:underline"
 												>
