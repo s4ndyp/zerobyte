@@ -40,14 +40,18 @@ export const retagSnapshots = async () => {
 	const allErrors = [...result.errors];
 
 	if (allErrors.length > 0) {
+		logger.error(`Migration ${MIGRATION_VERSION} completed with errors: ${allErrors.length} items failed.`);
+		logger.error(
+			`Some snapshots could not be retagged. Please check the logs for details. Fix any repository in error state and re-start zerobyte to retry the migration for failed items.`,
+		);
 		for (const err of allErrors) {
 			logger.error(`Migration failure - ${err.name}: ${err.error}`);
 		}
-		throw new MigrationError(MIGRATION_VERSION, allErrors);
+
+		return;
 	}
 
 	await recordMigrationCheckpoint(MIGRATION_VERSION);
-
 	logger.info(`Snapshots retagging migration (${MIGRATION_VERSION}) complete.`);
 };
 
@@ -82,46 +86,50 @@ const migrateSnapshotsToShortIdTag = async (): Promise<MigrationResult> => {
 	const backupSchedules = await db.query.backupSchedulesTable.findMany({});
 
 	for (const schedule of backupSchedules) {
-		const oldTag = schedule.id.toString();
-		const newTag = schedule.shortId;
+		try {
+			const oldTag = schedule.id.toString();
+			const newTag = schedule.shortId;
 
-		const repository = await db.query.repositoriesTable.findFirst({
-			where: eq(repositoriesTable.id, schedule.repositoryId),
-		});
-
-		if (!repository) {
-			errors.push({ name: `schedule:${schedule.name}`, error: `Associated repository not found` });
-			continue;
-		}
-
-		const error = await migrateTag(oldTag, newTag, repository, schedule.name);
-		if (error) {
-			errors.push({ name: `schedule:${schedule.name}`, error });
-			continue;
-		}
-
-		const mirrors = await db
-			.select()
-			.from(backupScheduleMirrorsTable)
-			.where(eq(backupScheduleMirrorsTable.scheduleId, schedule.id));
-
-		for (const mirror of mirrors) {
-			const mirrorRepo = await db.query.repositoriesTable.findFirst({
-				where: eq(repositoriesTable.id, mirror.repositoryId),
+			const repository = await db.query.repositoriesTable.findFirst({
+				where: eq(repositoriesTable.id, schedule.repositoryId),
 			});
 
-			if (!mirrorRepo) {
-				errors.push({ name: `schedule-mirror:${schedule.name}`, error: `Associated mirror repository not found` });
+			if (!repository) {
+				errors.push({ name: `schedule:${schedule.name}`, error: `Associated repository not found` });
 				continue;
 			}
 
-			const mirrorError = await migrateTag(oldTag, newTag, mirrorRepo, `${schedule.name} (mirror)`);
-			if (mirrorError) {
-				errors.push({ name: `schedule-mirror:${schedule.name}`, error: mirrorError });
+			const error = await migrateTag(oldTag, newTag, repository, schedule.name);
+			if (error) {
+				errors.push({ name: `schedule:${schedule.name}`, error });
+				continue;
 			}
-		}
 
-		logger.info(`Migrated snapshots for schedule '${schedule.name}' from tag '${oldTag}' to '${newTag}'`);
+			const mirrors = await db
+				.select()
+				.from(backupScheduleMirrorsTable)
+				.where(eq(backupScheduleMirrorsTable.scheduleId, schedule.id));
+
+			for (const mirror of mirrors) {
+				const mirrorRepo = await db.query.repositoriesTable.findFirst({
+					where: eq(repositoriesTable.id, mirror.repositoryId),
+				});
+
+				if (!mirrorRepo) {
+					errors.push({ name: `schedule-mirror:${schedule.name}`, error: `Associated mirror repository not found` });
+					continue;
+				}
+
+				const mirrorError = await migrateTag(oldTag, newTag, mirrorRepo, `${schedule.name} (mirror)`);
+				if (mirrorError) {
+					errors.push({ name: `schedule-mirror:${schedule.name}`, error: mirrorError });
+				}
+			}
+
+			logger.info(`Migrated snapshots for schedule '${schedule.name}' from tag '${oldTag}' to '${newTag}'`);
+		} catch (err) {
+			errors.push({ name: `schedule:${schedule.name}`, error: toMessage(err) });
+		}
 	}
 
 	return { success: errors.length === 0, errors };
