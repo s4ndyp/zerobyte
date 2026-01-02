@@ -7,7 +7,7 @@ import { toMessage } from "~/server/utils/errors";
 import { safeSpawn } from "~/server/utils/spawn";
 import { addCommonArgs, buildEnv, buildRepoUrl, cleanupTemporaryKeys } from "~/server/utils/restic";
 
-const MIGRATION_VERSION = "v0.21.0";
+const MIGRATION_VERSION = "v0.21.1";
 
 interface MigrationResult {
 	success: boolean;
