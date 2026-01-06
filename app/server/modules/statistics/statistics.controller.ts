@@ -1,6 +1,5 @@
 import { Hono } from "hono";
 import { statisticsService } from "./statistics.service";
-import type { GetBackupStatisticsQuery, GetBackupHistoryQuery } from "./statistics.dto";
 
 const router = new Hono();
 
@@ -22,4 +21,3 @@ router.get("/backup-history", async (c) => {
 });
 
 export { router as statisticsController };
-
