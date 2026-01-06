@@ -12,6 +12,7 @@ import { volumeController } from "./modules/volumes/volume.controller";
 import { backupScheduleController } from "./modules/backups/backups.controller";
 import { eventsController } from "./modules/events/events.controller";
 import { notificationsController } from "./modules/notifications/notifications.controller";
+import { statisticsController } from "./modules/statistics/statistics.controller";
 import { handleServiceError } from "./utils/errors";
 import { logger } from "./utils/logger";
 import { config } from "./core/config";
@@ -60,7 +61,8 @@ export const createApp = () => {
 		.route("/api/v1/backups", backupScheduleController)
 		.route("/api/v1/notifications", notificationsController)
 		.route("/api/v1/system", systemController)
-		.route("/api/v1/events", eventsController);
+		.route("/api/v1/events", eventsController)
+		.route("/api/v1/statistics", statisticsController);
 
 	app.get("/api/v1/openapi.json", generalDescriptor(app));
 	app.get("/api/v1/docs", requireAuth, scalarDescriptor);
