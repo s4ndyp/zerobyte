@@ -1,4 +1,4 @@
-import { Bell, CalendarClock, Database, HardDrive, Settings } from "lucide-react";
+import { BarChart3, Bell, CalendarClock, Database, HardDrive, Settings } from "lucide-react";
 import { Link, NavLink } from "react-router";
 import { useState } from "react";
 import {
@@ -35,6 +35,11 @@ const items = [
 		title: "Backups",
 		url: "/backups",
 		icon: CalendarClock,
+	},
+	{
+		title: "Statistieken",
+		url: "/statistics",
+		icon: BarChart3,
 	},
 	{
 		title: "Notifications",
