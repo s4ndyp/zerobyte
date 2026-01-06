@@ -1,4 +1,4 @@
-# Third-Party Software Licenses and Attributions
+# Third-Party Software Licenses and Attributions v1
 
 This software includes the following third-party components that are subject to separate license terms:
 
