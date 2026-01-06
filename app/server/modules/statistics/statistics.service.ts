@@ -1,6 +1,6 @@
-import { and, desc, eq, gte } from "drizzle-orm";
+import { desc, eq, gte } from "drizzle-orm";
 import { db } from "../../db/db";
-import { backupHistoryTable, backupSchedulesTable } from "../../db/schema";
+import { backupHistoryTable } from "../../db/schema";
 
 const getBackupStatistics = async (days = 30) => {
 	const since = Date.now() - (days * 24 * 60 * 60 * 1000);
