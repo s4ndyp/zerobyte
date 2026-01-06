@@ -201,6 +201,37 @@ export const backupScheduleMirrorRelations = relations(backupScheduleMirrorsTabl
 export type BackupScheduleMirror = typeof backupScheduleMirrorsTable.$inferSelect;
 
 /**
+ * Backup History Table
+ * Stores execution statistics for completed backups
+ */
+export const backupHistoryTable = sqliteTable("backup_history_table", {
+	id: int().primaryKey({ autoIncrement: true }),
+	scheduleId: int("schedule_id")
+		.notNull()
+		.references(() => backupSchedulesTable.id, { onDelete: "cascade" }),
+	snapshotId: text("snapshot_id").notNull(),
+	startedAt: int("started_at", { mode: "number" }).notNull(),
+	completedAt: int("completed_at", { mode: "number" }).notNull(),
+	duration: int("duration", { mode: "number" }).notNull(), // in milliseconds
+	totalBytes: int("total_bytes", { mode: "number" }).notNull(),
+	totalFiles: int("total_files", { mode: "number" }).notNull(),
+	filesNew: int("files_new", { mode: "number" }).notNull(),
+	filesChanged: int("files_changed", { mode: "number" }).notNull(),
+	filesUnmodified: int("files_unmodified", { mode: "number" }).notNull(),
+	dirsNew: int("dirs_new", { mode: "number" }).notNull(),
+	dirsChanged: int("dirs_changed", { mode: "number" }).notNull(),
+	dirsUnmodified: int("dirs_unmodified", { mode: "number" }).notNull(),
+	dataBlobs: int("data_blobs", { mode: "number" }).notNull(),
+	treeBlobs: int("tree_blobs", { mode: "number" }).notNull(),
+	dataAdded: int("data_added", { mode: "number" }).notNull(),
+	status: text().$type<"success" | "warning" | "error">().notNull(),
+	error: text(),
+	createdAt: int("created_at", { mode: "number" }).notNull().default(sql`(unixepoch() * 1000)`),
+});
+export type BackupHistory = typeof backupHistoryTable.$inferSelect;
+export type BackupHistoryInsert = typeof backupHistoryTable.$inferInsert;
+
+/**
  * App Metadata Table
  * Used for storing key-value pairs like migration checkpoints
  */
