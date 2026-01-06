@@ -3,7 +3,7 @@ import cron from "node-cron";
 import { CronExpressionParser } from "cron-parser";
 import { NotFoundError, BadRequestError, ConflictError } from "http-errors-enhanced";
 import { db } from "../../db/db";
-import { backupSchedulesTable, backupScheduleMirrorsTable, repositoriesTable, volumesTable } from "../../db/schema";
+import { backupSchedulesTable, backupScheduleMirrorsTable, repositoriesTable, volumesTable, backupHistoryTable } from "../../db/schema";
 import { restic } from "../../utils/restic";
 import { logger } from "../../utils/logger";
 import { cache } from "../../utils/cache";
@@ -54,6 +54,38 @@ const processPattern = (pattern: string, volumePath: string): string => {
 	}
 
 	return pattern;
+};
+
+const recordBackupHistory = async (
+	scheduleId: number,
+	startedAt: number,
+	result: typeof import("../../utils/restic").backupOutputSchema.infer,
+	status: "success" | "warning" | "error",
+	error?: string,
+) => {
+	const completedAt = Date.now();
+	const duration = completedAt - startedAt;
+
+	await db.insert(backupHistoryTable).values({
+		scheduleId,
+		snapshotId: result.snapshot_id,
+		startedAt,
+		completedAt,
+		duration,
+		totalBytes: result.total_bytes_processed,
+		totalFiles: result.total_files_processed,
+		filesNew: result.files_new,
+		filesChanged: result.files_changed,
+		filesUnmodified: result.files_unmodified,
+		dirsNew: result.dirs_new,
+		dirsChanged: result.dirs_changed,
+		dirsUnmodified: result.dirs_unmodified,
+		dataBlobs: result.data_blobs,
+		treeBlobs: result.tree_blobs,
+		dataAdded: result.data_added,
+		status,
+		error,
+	});
 };
 
 const listSchedules = async () => {
@@ -237,6 +269,7 @@ const executeBackup = async (scheduleId: number, manual = false) => {
 		throw new BadRequestError("Volume is not mounted");
 	}
 
+	const backupStartTime = Date.now();
 	logger.info(`Starting backup ${schedule.name} for volume ${volume.name} to repository ${repository.name}`);
 
 	serverEvents.emit("backup:started", {
@@ -330,6 +363,11 @@ const executeBackup = async (scheduleId: number, manual = false) => {
 
 		const finalStatus = exitCode === 0 ? "success" : "warning";
 
+		// Record backup history
+		if (result) {
+			await recordBackupHistory(scheduleId, backupStartTime, result, finalStatus);
+		}
+
 		cache.delByPrefix(`snapshots:${repository.id}:`);
 
 		const nextBackupAt = calculateNextRun(schedule.cronExpression);
@@ -371,16 +409,34 @@ const executeBackup = async (scheduleId: number, manual = false) => {
 				logger.error(`Failed to send backup success notification: ${toMessage(error)}`);
 			});
 	} catch (error) {
+		const errorMessage = toMessage(error);
 		logger.error(
-			`Backup ${schedule.name} failed for volume ${volume.name} to repository ${repository.name}: ${toMessage(error)}`,
+			`Backup ${schedule.name} failed for volume ${volume.name} to repository ${repository.name}: ${errorMessage}`,
 		);
+
+		// Record failed backup history
+		await recordBackupHistory(scheduleId, backupStartTime, {
+			snapshot_id: "",
+			files_new: 0,
+			files_changed: 0,
+			files_unmodified: 0,
+			dirs_new: 0,
+			dirs_changed: 0,
+			dirs_unmodified: 0,
+			data_blobs: 0,
+			tree_blobs: 0,
+			data_added: 0,
+			total_files_processed: 0,
+			total_bytes_processed: 0,
+			total_duration: 0,
+		}, "error", errorMessage);
 
 		await db
 			.update(backupSchedulesTable)
 			.set({
 				lastBackupAt: Date.now(),
 				lastBackupStatus: "error",
-				lastBackupError: toMessage(error),
+				lastBackupError: errorMessage,
 				updatedAt: Date.now(),
 			})
 			.where(eq(backupSchedulesTable.id, scheduleId));
